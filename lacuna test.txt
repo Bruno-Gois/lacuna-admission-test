@@ -1,0 +1,22 @@
+TCP/IP server: 
+lacuna-admission.brazilsouth.cloudapp.azure.com
+
+Rebel's Server Port 
+31829 
+Empire Server Port 
+21829 
+
+mandar o TOKEN como primeira msg!
+
+TOKEN - caff5e93-cae0-4b85-8466-0d2c8f8c5323
+
+
+
+https://stackoverflow.com/questions/22563986/understanding-getinputstream-and-getoutputstream
+https://stackoverflow.com/questions/11521027/whats-the-difference-between-dataoutputstream-and-objectoutputstream
+https://stackoverflow.com/questions/5680259/using-sockets-to-send-and-receive-data/5680427
+
+https://docs.oracle.com/javase/7/docs/api/java/io/DataOutputStream.html
+https://docs.oracle.com/javase/7/docs/api/java/io/DataInputStream.html
+
+https://wiki.sj.ifsc.edu.br/wiki/index.php/Trabalhando_com_sockets_TCP_em_Java  ?

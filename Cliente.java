@@ -1,4 +1,5 @@
 import java.net.Socket;
+import java.util.Arrays;
 import java.io.IOException;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -22,12 +23,22 @@ public class Cliente {
             dataInput = new DataInputStream(L314.getInputStream());
             dataOutput = new DataOutputStream(L314.getOutputStream());
             dataOutput.flush();
-            
-            //escrevendo a mensagem para o servidor
+
             escreverMensagem(token, dataOutput);
             
-            //lendo msg do servidor
-            lerMensagem(dataInput);
+            lerMensagemUTF(dataInput);
+            
+            escreverMensagem("tell me more", dataOutput);
+            
+            int[] teste = new int[64];
+            int i = 0;
+
+            while(dataInput.read() != -1) {
+                teste[i] = dataInput.read();
+                i++;
+            }
+            
+            System.out.println(Arrays.toString(teste));
         }
         catch (Exception e) {
             System.err.println("erroInit: " + e.toString());
@@ -44,12 +55,11 @@ public class Cliente {
         }
     }
 
-    private void lerMensagem(DataInputStream dataInput) {
+    private void lerMensagemUTF(DataInputStream dataInput) {
         try {
             System.out.println(dataInput.readUTF());
         } catch (Exception e) {
-            System.err.println("erroLeitura: " + e.toString());
-        }
-            
+            System.err.println("erroLeituraUTF: " + e.toString());
+        }     
     }
 }

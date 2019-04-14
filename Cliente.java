@@ -19,7 +19,6 @@ public class Cliente {
             L314 = new Socket(endereco, porta);
             System.out.println("Conectado ao servidor " + endereco + ", na porta: " + porta);
 
-            // ligando as conexoes de saida e de entrada
             dataInput = new DataInputStream(L314.getInputStream());
             dataOutput = new DataOutputStream(L314.getOutputStream());
             dataOutput.flush();
@@ -29,10 +28,9 @@ public class Cliente {
             
             //lendo msg do servidor
             lerMensagem(dataInput);
-
         }
         catch (Exception e) {
-            System.err.println("erro: " + e.toString());
+            System.err.println("erroInit: " + e.toString());
         }
     }
 
@@ -42,19 +40,15 @@ public class Cliente {
             dataOutput.flush();
         }
         catch (Exception e) {
-            System.err.println("erro: " + e.toString());
+            System.err.println("erroEscrita: " + e.toString());
         }
     }
 
     private void lerMensagem(DataInputStream dataInput) {
         try {
-            StringBuilder sb = new StringBuilder();
-            while (dataInput.read() > -1) {
-                sb.append( (char) dataInput.read());
-            }
-            System.out.println("Mensagem servidor: " + sb);
+            System.out.println(dataInput.readUTF());
         } catch (Exception e) {
-            System.err.println("erro: " + e.toString());
+            System.err.println("erroLeitura: " + e.toString());
         }
             
     }

@@ -30,18 +30,32 @@ public class Cliente {
             
             escreverMensagem("tell me more", dataOutput);
             
-            int[] teste = new int[64];
-            int i = 0;
+            lerMensagemCript(dataInput);
 
-            while(dataInput.read() != -1) {
-                teste[i] = dataInput.read();
-                i++;
+        }
+        catch (Exception e) {
+            System.err.println("erroInit: " + e.toString());
+        }
+    }
+
+    private void lerMensagemCript(DataInputStream dataInput) {
+        try{
+            int[] teste = new int[64];
+            int iter = 0;
+
+            for(int i = 0; i < teste.length; i++) {
+                teste[i] = 1;
+            }
+            
+            while(iter < 30) {
+                teste[iter] = dataInput. read();
+                iter++;
             }
             
             System.out.println(Arrays.toString(teste));
         }
         catch (Exception e) {
-            System.err.println("erroInit: " + e.toString());
+            System.err.println("erroEscrita: " + e.toString());
         }
     }
 

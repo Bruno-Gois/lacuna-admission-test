@@ -1,4 +1,5 @@
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.io.IOException;
 import java.io.DataInputStream;
@@ -28,9 +29,9 @@ public class Cliente {
             
             lerMensagemCript(dataInput);
             
-            System.out.println("TESTES: 1333 p byte -");
-            Integer bla = 1333;
-            System.out.println(bla.byteValue());
+            // System.out.println("TESTES: 1333 p byte -");
+            // Integer bla = 1333;
+            // System.out.println(bla.byteValue());
             // escreverMensagem("tell me more", dataOutput);
             
             // lerMensagemCript(dataInput);
@@ -47,19 +48,39 @@ public class Cliente {
             int len;
             byte[] buffer = new byte[1024];
             int padraoMsgImperio = 0;
-            
+
+            ArrayList<Byte> tamanhoMsgLida = new ArrayList<>();
+            ArrayList<Byte> msgLida = new ArrayList<>();
+            byte checkSumByte = -1;
+
             while ((len = dataInput.read(buffer)) > 0){ 
-                System.out.println("tamanho msg " + len); 
-                
+            
                 int i = 0;
                 while(i < len) {  
-                    System.out.print(buffer[i] + " ");
+                    //System.out.print(buffer[i] + " ");
+                    if(padraoMsgImperio == 0)
+                        tamanhoMsgLida.add(buffer[i]);
+                    if(padraoMsgImperio == 1)
+                        msgLida.add(buffer[i]);
+                    if(padraoMsgImperio == 2)
+                        checkSumByte = buffer[i];
+                    
                     i++;
                 }
-
+                //de acordo com o padrao de msg do imperio, o loop so ira rodar 3 vezes, capturando na primeira iteracao
+                //o tamanho, na segunda a msg em si, e na terceira o checksum
                 if(padraoMsgImperio > 1)
                     break;
+
                 padraoMsgImperio++;
+            }
+            if(analisarChecksum(msgLida, tamanhoMsgLida ,checkSumByte)) {
+                System.out.println("Tamanho msg: " + tamanhoMsgLida);
+                System.out.println("Mensagem: " + msgLida);
+                System.out.println("Checksum: " + checkSumByte);
+            }
+            else {
+                System.out.println("Erro na leitura! repetir?");
             }
 
         }
@@ -84,5 +105,22 @@ public class Cliente {
         } catch (Exception e) {
             System.err.println("erroLeituraUTF: " + e.toString());
         }     
+    }
+
+    private boolean analisarChecksum(ArrayList<Byte> msgLida, ArrayList<Byte> tamanhoMsg, byte checksum) {
+    
+        Integer somatorio = 0;
+
+        for(Byte i: msgLida) {
+            somatorio = somatorio + i;
+        } 
+        for(Byte i: tamanhoMsg) {
+            somatorio = somatorio + i;
+        }
+
+        if(somatorio.byteValue() == checksum) {
+            return true;
+        }
+        return false;
     }
 }

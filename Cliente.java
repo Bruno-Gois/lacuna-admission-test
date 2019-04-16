@@ -26,12 +26,16 @@ public class Cliente {
 
             escreverMensagem(token, dataOutput);
             
-            lerMensagemUTF(dataInput);
-            
-            escreverMensagem("tell me more", dataOutput);
-            
             lerMensagemCript(dataInput);
-
+            
+            System.out.println("TESTES: 1333 p byte -");
+            Integer bla = 1333;
+            System.out.println(bla.byteValue());
+            // escreverMensagem("tell me more", dataOutput);
+            
+            // lerMensagemCript(dataInput);
+            
+            //  escreverMensagem("stop", dataOutput);
         }
         catch (Exception e) {
             System.err.println("erroInit: " + e.toString());
@@ -40,22 +44,27 @@ public class Cliente {
 
     private void lerMensagemCript(DataInputStream dataInput) {
         try{
-            int[] teste = new int[64];
-            int iter = 0;
+            int len;
+            byte[] buffer = new byte[1024];
+            int padraoMsgImperio = 0;
+            
+            while ((len = dataInput.read(buffer)) > 0){ 
+                System.out.println("tamanho msg " + len); 
+                
+                int i = 0;
+                while(i < len) {  
+                    System.out.print(buffer[i] + " ");
+                    i++;
+                }
 
-            for(int i = 0; i < teste.length; i++) {
-                teste[i] = 1;
+                if(padraoMsgImperio > 1)
+                    break;
+                padraoMsgImperio++;
             }
-            
-            while(iter < 30) {
-                teste[iter] = dataInput. read();
-                iter++;
-            }
-            
-            System.out.println(Arrays.toString(teste));
+
         }
         catch (Exception e) {
-            System.err.println("erroEscrita: " + e.toString());
+            System.err.println("erroLeitura: " + e.toString());
         }
     }
 

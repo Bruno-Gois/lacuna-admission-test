@@ -42,19 +42,30 @@ public class Cliente {
     
     private void ChaveDecodificacao(byte[] msgCript) {
         byte[] vader = {86,97,100,101,114}; //Vader in ASCII
+        int tamanhoMsg = msgCript.length;
+        int tamanhoVader = vader.length;
         int chave;
         int chaveTemp;
+        
+        int i = 0;
+        int j = 0;
         int nroInteracoes = 0;
 
-        // for(int i = 0; i < (msgCript.length-vader.length); i++) {
-        //     while() {
-        //         chave = vader[i] ^ msgCript[i];
-        //         chaveTemp = vader[i++] ^ msgCript[i++];
-        //         System.out.println("CHAVE " + chave);
-        //         System.out.println("TEMP " + chaveTemp);
+        System.out.println(Arrays.toString(vader));
 
-        //     }
-        // }
+        while(j < tamanhoMsg && nroInteracoes <= (tamanhoMsg - tamanhoVader) + 1) {
+            while(i < tamanhoVader) {
+               // if((vader[i] ^ msgCript[j]) == (vader[i++] ^ msgCript[j++]))
+                System.out.println("i=" + i + " j=" + j);
+                // else
+                //     System.out.println("FALHA i=" + i + " j =" + j);
+                i++;
+                j++;
+            }
+            nroInteracoes++;
+            i = 0;
+            j = nroInteracoes;
+        }
     }
 
 

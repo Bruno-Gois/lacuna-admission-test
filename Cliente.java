@@ -11,7 +11,7 @@ public class Cliente {
     Socket L314;
     DataInputStream dataInput;
     DataOutputStream dataOutput;
-    String token = "caff5e93-cae0-4b85-8466-0d2c8f8c5323";
+    String token = "1457accc-251f-44e8-be52-9f2099738e00";
 
     Cliente(String endereco, int porta) {
         initCliente(endereco, porta);
@@ -34,7 +34,6 @@ public class Cliente {
 
             ChaveDecodificacao(lerMensagemCript(dataInput));
             
-            // escreverMensagem("stop", dataOutput);
         } catch (Exception e) {
             System.err.println("erroInit: " + e.toString());
         }
@@ -44,30 +43,65 @@ public class Cliente {
         byte[] vader = {86,97,100,101,114}; //Vader in ASCII
         int tamanhoMsg = msgCript.length;
         int tamanhoVader = vader.length;
-        int chave;
-        int chaveTemp;
-        
+        byte chave = -1;
+        int verificadorDeChave = 0;
+
         int i = 0;
         int j = 0;
         int nroInteracoes = 0;
 
         System.out.println(Arrays.toString(vader));
 
-        while(j < tamanhoMsg && nroInteracoes <= (tamanhoMsg - tamanhoVader) + 1) {
+        testeLoop:
+        while(j < tamanhoMsg && nroInteracoes < (tamanhoMsg - tamanhoVader) + 1) {
+            chave = (byte) (vader[i] ^ msgCript[j]);
+
             while(i < tamanhoVader) {
-               // if((vader[i] ^ msgCript[j]) == (vader[i++] ^ msgCript[j++]))
-                System.out.println("i=" + i + " j=" + j);
+                //System.out.println("i=" + i + " j=" + j);
+                
+                if(chave == (vader[i] ^ msgCript[j])) {
+                    //System.out.println("IGUAIS " + chave + " " + (vader[i] ^ msgCript[j]));
+                    verificadorDeChave++;
+                }
                 // else
-                //     System.out.println("FALHA i=" + i + " j =" + j);
-                i++;
-                j++;
-            }
+                //     System.out.println("DIFERENTES " +chave + " " + (vader[i] ^ msgCript[j]));
+                    i++;
+                    j++;
+
+                    if(verificadorDeChave == 4) {//achou chave
+                        System.out.println("CHAVE = " + chave);
+                        break testeLoop;
+                    }
+                }
+            verificadorDeChave = 0;
             nroInteracoes++;
             i = 0;
             j = nroInteracoes;
         }
+
+        if(verificadorDeChave == 4) { //chave foi encontrada
+            decodificarMensagem(msgCript, chave);
+        }
+        else {
+            System.out.println("Chave nao encontrada!");
+        }
     }
 
+    private void decodificarMensagem(byte[] msg, byte chave) {
+        byte[] novaMsg = new byte[msg.length];
+
+        for(int i = 0; i < msg.length; i++) {
+            novaMsg[i] = (byte) (msg[i] ^ chave);
+        }
+        
+        System.out.println("MSG CRIPTO");
+        System.out.println(Arrays.toString(msg));
+        System.out.println(new String(msg, StandardCharsets.UTF_8));
+
+        System.out.println("MSG DECODIFICADA");
+        System.out.println(Arrays.toString(novaMsg));
+        System.out.println(new String(novaMsg, StandardCharsets.UTF_8));
+    }
 
     private void lerUTF(DataInputStream dataInput) {
         byte[] byteMsg = lerMensagemCript(dataInput);

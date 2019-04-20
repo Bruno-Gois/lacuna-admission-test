@@ -29,9 +29,17 @@ public class Cliente {
             escreverMensagem(token, dataOutput);
             
             lerUTF(dataInput);
+            
+            escreverMensagem("tell me more", dataOutput);
+            ChaveDecodificacao(lerMensagemCript(dataInput));
 
             escreverMensagem("tell me more", dataOutput);
+            ChaveDecodificacao(lerMensagemCript(dataInput));
 
+            escreverMensagem("tell me more", dataOutput);
+            ChaveDecodificacao(lerMensagemCript(dataInput));
+
+            escreverMensagem("tell me more", dataOutput);
             ChaveDecodificacao(lerMensagemCript(dataInput));
             
         } catch (Exception e) {
@@ -87,6 +95,17 @@ public class Cliente {
         }
     }
 
+    private boolean verificarPresencaCoordenada(byte[] msg) {
+        System.out.println("OPAAAAA");
+        String msgRecebida = new String(msg, StandardCharsets.UTF_8);
+
+        System.out.println("fica p prox" + msgRecebida);
+        String pattern = "x[1-9]+y[1-9]+[,| ]";
+
+        System.out.println(msgRecebida.matches(pattern));
+        return msgRecebida.matches(pattern);
+    }
+
     private void decodificarMensagem(byte[] msg, byte chave) {
         byte[] novaMsg = new byte[msg.length];
 
@@ -94,13 +113,18 @@ public class Cliente {
             novaMsg[i] = (byte) (msg[i] ^ chave);
         }
         
-        System.out.println("MSG CRIPTO");
-        System.out.println(Arrays.toString(msg));
-        System.out.println(new String(msg, StandardCharsets.UTF_8));
+        // System.out.println("MSG CRIPTO");
+        // System.out.println(Arrays.toString(msg));
+        // System.out.println(new String(msg, StandardCharsets.UTF_8));
+
+        if(verificarPresencaCoordenada(novaMsg) == true){
+            System.out.println("Msg eh coordenada do imperio!");
+        }
 
         System.out.println("MSG DECODIFICADA");
-        System.out.println(Arrays.toString(novaMsg));
+        //System.out.println(Arrays.toString(novaMsg));
         System.out.println(new String(novaMsg, StandardCharsets.UTF_8));
+
     }
 
     private void lerUTF(DataInputStream dataInput) {

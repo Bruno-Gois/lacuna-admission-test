@@ -2,9 +2,12 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.regex.Matcher;
 import java.io.IOException;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 public class Cliente {
 
@@ -96,14 +99,13 @@ public class Cliente {
     }
 
     private boolean verificarPresencaCoordenada(byte[] msg) {
-        System.out.println("OPAAAAA");
         String msgRecebida = new String(msg, StandardCharsets.UTF_8);
 
-        System.out.println("fica p prox" + msgRecebida);
-        String pattern = "x[1-9]+y[1-9]+[,| ]";
+        Pattern p = Pattern.compile("x[0-9]+y[0-9]+");
 
-        System.out.println(msgRecebida.matches(pattern));
-        return msgRecebida.matches(pattern);
+        Matcher m = p.matcher(msgRecebida);
+
+        return m.find();
     }
 
     private void decodificarMensagem(byte[] msg, byte chave) {
@@ -117,14 +119,15 @@ public class Cliente {
         // System.out.println(Arrays.toString(msg));
         // System.out.println(new String(msg, StandardCharsets.UTF_8));
 
-        if(verificarPresencaCoordenada(novaMsg) == true){
+        if(verificarPresencaCoordenada(novaMsg)){
             System.out.println("Msg eh coordenada do imperio!");
+            System.out.println(new String(novaMsg, StandardCharsets.UTF_8));
         }
-
-        System.out.println("MSG DECODIFICADA");
         //System.out.println(Arrays.toString(novaMsg));
-        System.out.println(new String(novaMsg, StandardCharsets.UTF_8));
-
+        else {
+            System.out.println("Msg NAO eh coordenada");
+            System.out.println(new String(novaMsg, StandardCharsets.UTF_8));
+        }
     }
 
     private void lerUTF(DataInputStream dataInput) {

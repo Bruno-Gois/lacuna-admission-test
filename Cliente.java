@@ -11,9 +11,16 @@ import java.util.regex.Matcher;
 
 public class Cliente {
 
-    Socket L314;
+    Socket R2D2;
     DataInputStream dataInput;
     DataOutputStream dataOutput;
+
+    Socket L314;
+    DataInputStream dataInputRebel;
+    DataOutputStream dataOutputRebel;
+    int portaRebelde = 31959;
+    byte[] teste;
+
     String token = "1457accc-251f-44e8-be52-9f2099738e00";
 
     Cliente(String endereco, int porta) {
@@ -22,35 +29,53 @@ public class Cliente {
 
     private void initCliente(String endereco, int porta) {
         try {
-            L314 = new Socket(endereco, porta);
-            System.out.println("Conectado ao servidor " + endereco + ", na porta: " + porta);
+            L314 = new Socket(endereco, portaRebelde);
+            R2D2 = new Socket(endereco, porta);
 
-            dataInput = new DataInputStream(L314.getInputStream());
-            dataOutput = new DataOutputStream(L314.getOutputStream());
+            dataInput = new DataInputStream(R2D2.getInputStream());
+            dataOutput = new DataOutputStream(R2D2.getOutputStream());
             dataOutput.flush();
 
-            escreverMensagem(token, dataOutput);
-            
+            dataInputRebel = new DataInputStream(L314.getInputStream());
+            dataOutputRebel = new DataOutputStream(L314.getOutputStream());
+            dataOutputRebel.flush();
+
+            escreverMensagem(token, dataOutput);         
             lerUTF(dataInput);
             
             escreverMensagem("tell me more", dataOutput);
-            ChaveDecodificacao(lerMensagemCript(dataInput));
+            teste = ChaveDecodificacao(lerMensagemCript(dataInput));
 
-            escreverMensagem("tell me more", dataOutput);
-            ChaveDecodificacao(lerMensagemCript(dataInput));
+            if(verificarPresencaCoordenada(teste)){
+                System.out.println("Msg eh coordenada do imperio!");
+                System.out.println(new String(teste, StandardCharsets.UTF_8));
+            }
+    
+            else {
+                System.out.println("Msg NAO eh coordenada");
+                System.out.println(new String(teste, StandardCharsets.UTF_8));
+            }
 
-            escreverMensagem("tell me more", dataOutput);
-            ChaveDecodificacao(lerMensagemCript(dataInput));
+            // escreverMensagem("tell me more", dataOutput);
+            // teste = ChaveDecodificacao(lerMensagemCript(dataInput));
 
-            escreverMensagem("tell me more", dataOutput);
-            ChaveDecodificacao(lerMensagemCript(dataInput));
+            // if(verificarPresencaCoordenada(teste)){
+            //     System.out.println("Msg eh coordenada do imperio!");
+            //     System.out.println(new String(teste, StandardCharsets.UTF_8));
+            // }
+    
+            // else {
+            //     System.out.println("Msg NAO eh coordenada");
+            //     System.out.println(new String(teste, StandardCharsets.UTF_8));
+            // }
+
             
         } catch (Exception e) {
             System.err.println("erroInit: " + e.toString());
         }
     }
     
-    private void ChaveDecodificacao(byte[] msgCript) {
+    private byte[] ChaveDecodificacao(byte[] msgCript) {
         byte[] vader = {86,97,100,101,114}; //Vader in ASCII
         int tamanhoMsg = msgCript.length;
         int tamanhoVader = vader.length;
@@ -61,29 +86,21 @@ public class Cliente {
         int j = 0;
         int nroInteracoes = 0;
 
-        System.out.println(Arrays.toString(vader));
-
         testeLoop:
         while(j < tamanhoMsg && nroInteracoes < (tamanhoMsg - tamanhoVader) + 1) {
             chave = (byte) (vader[i] ^ msgCript[j]);
 
-            while(i < tamanhoVader) {
-                //System.out.println("i=" + i + " j=" + j);
-                
+            while(i < tamanhoVader) {    
                 if(chave == (vader[i] ^ msgCript[j])) {
-                    //System.out.println("IGUAIS " + chave + " " + (vader[i] ^ msgCript[j]));
                     verificadorDeChave++;
                 }
-                // else
-                //     System.out.println("DIFERENTES " +chave + " " + (vader[i] ^ msgCript[j]));
-                    i++;
-                    j++;
+                i++;
+                j++;
 
-                    if(verificadorDeChave == 4) {//achou chave
-                        System.out.println("CHAVE = " + chave);
-                        break testeLoop;
-                    }
+                if(verificadorDeChave == 4) {//achou chave
+                    break testeLoop;
                 }
+            }
             verificadorDeChave = 0;
             nroInteracoes++;
             i = 0;
@@ -91,10 +108,11 @@ public class Cliente {
         }
 
         if(verificadorDeChave == 4) { //chave foi encontrada
-            decodificarMensagem(msgCript, chave);
+            return decodificarMensagem(msgCript, chave);
         }
         else {
             System.out.println("Chave nao encontrada!");
+            return null;
         }
     }
 
@@ -108,26 +126,14 @@ public class Cliente {
         return m.find();
     }
 
-    private void decodificarMensagem(byte[] msg, byte chave) {
+    private byte[] decodificarMensagem(byte[] msg, byte chave) {
         byte[] novaMsg = new byte[msg.length];
 
         for(int i = 0; i < msg.length; i++) {
             novaMsg[i] = (byte) (msg[i] ^ chave);
         }
-        
-        // System.out.println("MSG CRIPTO");
-        // System.out.println(Arrays.toString(msg));
-        // System.out.println(new String(msg, StandardCharsets.UTF_8));
 
-        if(verificarPresencaCoordenada(novaMsg)){
-            System.out.println("Msg eh coordenada do imperio!");
-            System.out.println(new String(novaMsg, StandardCharsets.UTF_8));
-        }
-        //System.out.println(Arrays.toString(novaMsg));
-        else {
-            System.out.println("Msg NAO eh coordenada");
-            System.out.println(new String(novaMsg, StandardCharsets.UTF_8));
-        }
+        return novaMsg;
     }
 
     private void lerUTF(DataInputStream dataInput) {
@@ -146,22 +152,20 @@ public class Cliente {
         byte checkSumByte = -1;
         try {
             while ((len = dataInput.read(buffer)) > 0) {
-
                 int i = 0;
                 while (i < len) {
-                    // System.out.print(buffer[i] + " ");
                     if (padraoMsgImperio == 0)
                         tamanhoMsgLida.add(buffer[i]);
                     if (padraoMsgImperio == 1)
                         msgLida.add(buffer[i]);
                     if (padraoMsgImperio == 2)
                         checkSumByte = buffer[i];
-
                     i++;
                 }
                 // de acordo com o padrao de msg do imperio, o loop so ira rodar 3 vezes,
-                // capturando na primeira iteracao
-                // o tamanho, na segunda a msg em si, e na terceira o checksum
+                // capturando na primeira iteracao o tamanho, na segunda a msg em si 
+                // e na terceira o checksum
+
                 if (padraoMsgImperio > 1)
                     break;
 
@@ -173,7 +177,6 @@ public class Cliente {
         }
 
         if (analisarChecksum(msgLida, tamanhoMsgLida, checkSumByte)) {
-            System.out.println(msgLida);
             return converterParaPrimitivo(msgLida.toArray(new Byte[0]));
         } else {
             System.out.println("Erro no checksum!");
@@ -202,7 +205,6 @@ public class Cliente {
     }
 
     private boolean analisarChecksum(ArrayList<Byte> msgLida, ArrayList<Byte> tamanhoMsg, byte checksum) {
-
         Integer somatorio = 0;
 
         for (Byte i : msgLida) {
